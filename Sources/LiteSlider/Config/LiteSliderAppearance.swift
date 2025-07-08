@@ -20,6 +20,8 @@ public enum LiteSliderExpansionDirection: Sendable {
 // MARK: - LiteSliderLengthBehavior
 
 /// Defines how the slider determines its total track length.
+///
+/// Set via `sliderLengthBehavior(_:)`
 public enum LiteSliderLengthBehavior: Sendable {
 
     /// The slider adapts its length based on layout constraints.
@@ -44,6 +46,8 @@ public enum LiteSliderLengthBehavior: Sendable {
 // MARK: - LiteSliderStrokeStyle
 
 /// A stroke style used to draw outlines or borders in the slider UI.
+///
+/// Set via `.sliderStroke(_:, lineWidth:)`
 public struct LiteSliderStrokeStyle: Sendable, Equatable {
 
     /// The stroke color.
@@ -63,6 +67,64 @@ public struct LiteSliderStrokeStyle: Sendable, Equatable {
     }
 }
 
+// MARK: - ElasticDragProperties
+
+/// Configurable properties that control the elastic drag effect of a
+/// LiteSlider.
+///
+/// Set via `.sliderElasticDrag(_:)`.
+public struct ElasticDragProperties: Sendable {
+    /// The distance (in points) that the view shifts in the direction of drag
+    /// when pulled beyond its bounds.
+    public let offsetSize: CGFloat
+
+    /// The factor by which the view compresses along the axis perpendicular
+    /// to the drag direction.
+    ///
+    /// A value of `0` means no compression (0% of the thickness),
+    /// and `1` means full compression equal to 100% of the thickness.
+    public let compressionFactor: CGFloat
+
+    /// The factor by which the view expands along the axis of the drag.
+    ///
+    /// This expansion is proportional to the slider's thickness (i.e. the size
+    /// along the axis opposite to the drag direction).
+    ///
+    /// A value of `0` means no expansion (0% of the thickness),
+    /// and `1` means full expansion equal to 100% of the thickness.
+    public let expansionFactor: CGFloat
+
+    /// Creates a new set of elastic drag properties.
+    /// - Parameters:
+    ///   - offsetSize: The maximum offset to apply during excess drag.
+    ///   - compressionFactor: The scaling factor for compression (relative to
+    ///   thickness).
+    ///   - expansionFactor: The scaling factor for expansion (relative to
+    ///   thickness).
+    public init(
+        offsetSize: CGFloat,
+        compressionFactor: CGFloat,
+        expansionFactor: CGFloat
+    ) {
+        self.offsetSize = offsetSize
+        self.compressionFactor = compressionFactor
+        self.expansionFactor = expansionFactor
+    }
+
+    /// The default elastic drag properties used by LiteSlider.
+    public static let `default` = ElasticDragProperties(
+        offsetSize: 25,
+        compressionFactor: 0.1,
+        expansionFactor: 0.2
+    )
+
+    /// A configuration that disables the elastic drag effect.
+    public static let disable = ElasticDragProperties(
+        offsetSize: 0,
+        compressionFactor: 1,
+        expansionFactor: 1
+    )
+}
 
 // MARK: - View Modifiers
 
@@ -70,14 +132,14 @@ extension View {
 
     /// Sets the thickness of the slider track.
     ///
-    /// Default: `20`
+    /// Default: `300`
     public func sliderThickness(_ thickness: CGFloat) -> some View {
         environment(\.liteSliderThickness, thickness)
     }
 
     /// Sets the corner radius of the slider track.
     ///
-    /// Default: `10`
+    /// Default: `30`
     public func sliderRadius(_ radius: CGFloat) -> some View {
         environment(\.liteSliderRadius, radius)
     }
@@ -93,7 +155,7 @@ extension View {
 
     /// Sets the background color of the slider's track.
     ///
-    /// Default: `.gray.opacity(0.4)`
+    /// Default: `.secondary`
     public func sliderTrackColor(_ color: Color) -> some View {
         environment(\.liteSliderTrackColor, color)
     }
@@ -107,11 +169,55 @@ extension View {
 
     /// Sets the stroke color and width of the slider track outline.
     ///
-    /// Default: `Color.clear`, `lineWidth: 0`
+    /// Default: `.clear`, `lineWidth: 0`
     public func sliderStroke(_ color: Color, lineWidth: CGFloat) -> some View {
         environment(
             \.liteSliderStrokeStyle,
             .init(color: color, lineWidth: lineWidth)
+        )
+    }
+
+    /// Sets the elastic drag behavior for views that support slider-like
+    /// interaction and respond to excess drag gestures.
+    ///
+    /// Default:
+    /// ```
+    /// ElasticDragProperties(
+    ///     offsetSize: 25,
+    ///     compressionFactor: 0.1,
+    ///     expansionFactor: 0.2
+    /// )
+    /// ```
+    public func sliderElasticDrag(
+        _ properties: ElasticDragProperties
+    ) -> some View {
+        environment(\.liteSliderElasticDragProperties, properties)
+    }
+
+    /// Sets the elastic drag behavior for views that support slider-like
+    /// interaction and respond to excess drag gestures.
+    ///
+    /// - Parameters:
+    ///   - offsetSize: The maximum offset to apply during excess drag.
+    ///   - compressionFactor: The scaling factor for compression (relative to
+    ///   thickness).
+    ///   - expansionFactor: The scaling factor for expansion (relative to
+    ///   thickness).
+    ///
+    /// Default:
+    /// `offsetSize: 25`, `compressionFactor: 0.1`, `expansionFactor: 0.2`
+    public func sliderElasticDrag(
+        offsetSize: CGFloat,
+        compressionFactor: CGFloat,
+        expansionFactor: CGFloat
+    ) -> some View {
+        environment(
+            \.liteSliderElasticDragProperties,
+             ElasticDragProperties(
+                offsetSize: offsetSize,
+                compressionFactor: compressionFactor,
+                expansionFactor: expansionFactor
+             )
         )
     }
 }
@@ -119,11 +225,11 @@ extension View {
 // MARK: - Environment Keys
 
 private struct LiteSliderThicknessKey: EnvironmentKey {
-    static let defaultValue: CGFloat = 20
+    static let defaultValue: CGFloat = 100
 }
 
 private struct LiteSliderRadiusKey: EnvironmentKey {
-    static let defaultValue: CGFloat = 10
+    static let defaultValue: CGFloat = 30
 }
 
 private struct LiteSliderLengthBehaviorKey: EnvironmentKey {
@@ -131,7 +237,7 @@ private struct LiteSliderLengthBehaviorKey: EnvironmentKey {
 }
 
 private struct LiteSliderTrackColorKey: EnvironmentKey {
-    static let defaultValue: Color = .gray.opacity(0.4)
+    static let defaultValue: Color = .secondary
 }
 
 private struct LiteSliderProgressColorKey: EnvironmentKey {
@@ -140,6 +246,10 @@ private struct LiteSliderProgressColorKey: EnvironmentKey {
 
 private struct LiteSliderStrokeStyleKey: EnvironmentKey {
     static let defaultValue = LiteSliderStrokeStyle(color: .clear, lineWidth: 0)
+}
+
+private struct LiteSliderElasticDragKey: EnvironmentKey {
+    static let defaultValue = ElasticDragProperties.default
 }
 
 // MARK: - EnvironmentValues
@@ -174,5 +284,10 @@ extension EnvironmentValues {
     var liteSliderStrokeStyle: LiteSliderStrokeStyle {
         get { self[LiteSliderStrokeStyleKey.self] }
         set { self[LiteSliderStrokeStyleKey.self] = newValue }
+    }
+
+    var liteSliderElasticDragProperties: ElasticDragProperties {
+        get { self[LiteSliderElasticDragKey.self] }
+        set { self[LiteSliderElasticDragKey.self] = newValue }
     }
 }

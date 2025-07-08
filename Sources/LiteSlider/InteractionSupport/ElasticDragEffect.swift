@@ -53,12 +53,19 @@ private struct ElasticDragEffect: ViewModifier {
     var availableLength: CGFloat
     var dragLocation: CGPoint
 
+    // MARK: Environment
+
+    @Environment(\.liteSliderElasticDragProperties) private var properties
+
     // MARK: Constants
 
     private let animation: Animation = .easeOut(duration: 0.15)
-    private let offsetSize: CGFloat = 25
-    private let compressionFactor: CGFloat = 0.9
-    private let expansionFactor: CGFloat = 0.2
+
+    // MARK: Computed Properties
+
+    private var offsetSize: CGFloat { properties.offsetSize }
+    private var compressionFactor: CGFloat { properties.compressionFactor }
+    private var expansionFactor: CGFloat { properties.expansionFactor }
 
     // MARK: Body
 
@@ -125,9 +132,9 @@ private struct ElasticDragEffect: ViewModifier {
         case (.horizontal, .horizontal):
             return size.width + size.height * expansionFactor
         case (.horizontal, .vertical):
-            return size.height * compressionFactor
+            return size.height * (1 - compressionFactor)
         case (.vertical, .horizontal):
-            return size.width * compressionFactor
+            return size.width * (1 - compressionFactor)
         case (.vertical, .vertical):
             return size.height + size.width * expansionFactor
         }

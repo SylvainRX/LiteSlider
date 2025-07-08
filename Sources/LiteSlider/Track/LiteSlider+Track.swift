@@ -39,7 +39,6 @@ extension LiteSlider {
         @Environment(\.liteSliderTrackColor) private var trackColor
         @Environment(\.liteSliderProgressColor) private var progressColor
         @Environment(\.liteSliderStrokeStyle) private var strokeStyle
-        @Environment(\.liteSliderOnEnded) private var onEnded
 
         // MARK: Constants
 
@@ -108,9 +107,6 @@ extension LiteSlider {
                 .onChanged { location in
                     updateDragLocation(for: location)
                     updateDragRatio()
-                }
-                .onEnded {
-                    onEnded()
                 }
         }
 

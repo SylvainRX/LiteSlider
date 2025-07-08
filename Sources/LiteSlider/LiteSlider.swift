@@ -29,6 +29,7 @@ public struct LiteSlider<ThumbView: View>: View {
     private var accessibilityValueFormatter
     @Environment(\.liteSliderAccessibilityValueStep)
     private var accessibilityValueStep
+    @Environment(\.liteSliderOnEnded) private var onEnded
 
     // MARK: State
 
@@ -89,6 +90,9 @@ public struct LiteSlider<ThumbView: View>: View {
             }
             .onChange(of: externalValue) { _, newValue in
                 updateDragValue(with: newValue)
+            }
+            .onChange(of: isDragging) { _, newValue in
+                if !newValue { onEnded() }
             }
             .accessibilityElement()
             .accessibilityValue(Text(accessibilityFormattedValue))
@@ -174,6 +178,8 @@ public struct LiteSlider<ThumbView: View>: View {
             .string(from: NSNumber(value: externalValue)) ?? ""
     }
 }
+
+// MARK: - Preview
 
 #Preview {
     @Previewable @State var value: Double = 50
