@@ -14,7 +14,7 @@ extension LiteSlider {
 
         /// A closure that returns a custom view for the slider thumb, or `nil`
         /// to use the default appearance.
-        let thumbView: ThumbViewProvider?
+        let thumbViewProvider: ThumbViewProvider?
 
         /// A binding to the current drag ratio, representing the thumb's
         /// position along the track from 0 to 1.
@@ -39,57 +39,77 @@ extension LiteSlider {
         @Environment(\.liteSliderTrackColor) private var trackColor
         @Environment(\.liteSliderProgressColor) private var progressColor
         @Environment(\.liteSliderStrokeStyle) private var strokeStyle
+        @Environment(\.liteSliderElasticDragProperties)
+        private var elasticDragProperties
 
         // MARK: Constants
 
-        private let thumbSize: CGFloat = 70
-        private let valueChangeAnimation: Animation = .easeOut(duration: 0.30)
-        private let dragAnimation: Animation = .easeOut(duration: 0.15)
+        private let touchLocationLength: CGFloat = 70
+        private let valueChangeAnimation: Animation = .spring(duration: 0.30)
+        private let dragAnimation: Animation = .spring(duration: 0.15)
 
         // MARK: View
 
         var body: some View {
-            ZStack(alignment: .bottom) {
-                Rectangle().fill(.clear)
-                    .overlay(alignment: .top) { background }
-                    .overlay(alignment: .bottom) { progress }
+            ZStack(alignment: .top) {
+                track
+                thumbView
             }
             .gesture(gesture)
-            .elasticDragEffect(
-                size: CGSize(width: thickness, height: length),
-                isDragging: isDragging,
-                availableLength: availableLength,
-                dragLocation: dragLocation
-            )
             .animation(dragAnimation, value: isDragging)
             .animation(valueChangeAnimation, value: dragRatio)
+            .animation(valueChangeAnimation, value: elasticDragMetrics)
+
         }
 
         // MARK: Subviews
 
-        private var background: some View {
-            ZStack {
-                BackgroundStrokeShape(cornerRadius: radius)
-                    .stroke(lineWidth: strokeStyle.lineWidth)
-
-                BackgroundShape(cornerRadius: radius)
-                    .fill(trackColor)
+        private var track: some View {
+            let trackShapeParameters = trackShapeParameters
+            return ZStack {
+                background(trackShapeParameters)
+                progress(trackShapeParameters)
             }
-            .frame(height: backgroundLength)
         }
 
-        private var progress: some View {
+        private func background(
+            _ trackShapeParameters: TrackShapeParameters
+        ) -> some View {
             ZStack {
-                ProgressStrokeShape(cornerRadius: radius)
+                BackgroundStrokeShape(trackShapeParameters)
                     .stroke(lineWidth: strokeStyle.lineWidth)
-
-                ProgressShape(cornerRadius: radius)
-                    .fill(progressColor)
-                    .overlay(alignment: .top) {
-                        thumbView?(isDragging)
-                    }
+                BackgroundShape(trackShapeParameters)
+                    .fill(trackColor)
             }
-            .frame(height: progressLength)
+        }
+
+        private func progress(
+            _ trackShapeParameters: TrackShapeParameters
+        ) -> some View {
+            ZStack {
+                ProgressStrokeShape(trackShapeParameters)
+                    .stroke(lineWidth: strokeStyle.lineWidth)
+                ProgressShape(trackShapeParameters)
+                    .fill(progressColor)
+            }
+        }
+
+        private var trackShapeParameters: TrackShapeParameters {
+            let elasticDragMetrics = elasticDragMetrics
+            return TrackShapeParameters(
+                radius: radius,
+                ratio: dragRatio,
+                thumbLength: thumbLength,
+                offset: elasticDragMetrics.offset.height,
+                scale: elasticDragMetrics.scale
+            )
+        }
+
+        private var thumbView: some View {
+            let elasticDragMetrics = elasticDragMetrics
+            return thumbViewProvider?(isDragging)
+                .offset(y: thumbValueOffset + elasticDragMetrics.thumbOffset)
+                .frame(width: thickness, height: thickness)
         }
 
         // MARK: Gesture
@@ -111,37 +131,47 @@ extension LiteSlider {
         }
 
         private func updateDragLocation(for location: CGPoint) {
-            dragLocation.y = length - location.y - thumbSize / 2
+            dragLocation.y = length - location.y - touchLocationLength / 2
         }
 
         private func updateDragRatio() {
+            let availableLength = trackGeometry.availableLength
             let clamped = dragLocation.y.clamped(to: 0...availableLength)
             dragRatio = clamped / max(1, availableLength)
         }
 
         // MARK: Layout Helpers
 
-        private var backgroundLength: CGFloat {
-            availableLength - progressOffset + radius
-        }
-
-        private var progressLength: CGFloat {
-            progressOffset + thumbLength
-        }
-
-        private var progressOffset: CGFloat {
-            let offset = dragRatio * availableLength
-            return offset.clamped(to: 0...availableLength)
+        private var trackGeometry: LiteSliderTrackGeometry {
+            .init(
+                ratio: dragRatio,
+                trackLength: length,
+                thumbLength: thumbLength,
+                radius: radius
+            )
         }
 
         private var thumbLength: CGFloat {
-            thumbView != nil && isDragging
-                ? thickness + thumbSize
+            thumbViewProvider != nil && isDragging
+                ? thickness + touchLocationLength
                 : thickness
         }
 
-        private var availableLength: CGFloat {
-            max(0, length - thumbLength)
+        private var thumbValueOffset: CGFloat {
+            let availableLength = trackGeometry.availableLength
+            return ((1 - dragRatio) * availableLength)
+                .clamped(to: 0...availableLength)
+        }
+
+        private var elasticDragMetrics: ElasticDragMetrics {
+            ElasticDragMetrics(
+                size: CGSize(width: thickness, height: length),
+                orientation: .vertical,
+                isDragging: isDragging,
+                availableLength: trackGeometry.availableLength,
+                dragLocation: dragLocation,
+                properties: elasticDragProperties
+            )
         }
     }
 }

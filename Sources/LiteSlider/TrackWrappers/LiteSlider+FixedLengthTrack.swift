@@ -27,7 +27,7 @@ extension LiteSlider {
         var body: some View {
             Track(
                 length: length,
-                thumbView: thumbView,
+                thumbViewProvider: thumbView,
                 dragRatio: $dragRatio,
                 isDragging: $isDragging,
                 onStartDragging: nil

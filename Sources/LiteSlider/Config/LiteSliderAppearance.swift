@@ -73,7 +73,7 @@ public struct LiteSliderStrokeStyle: Sendable, Equatable {
 /// LiteSlider.
 ///
 /// Set via `.sliderElasticDrag(_:)`.
-public struct ElasticDragProperties: Sendable {
+public struct ElasticDragProperties: Sendable, Equatable {
     /// The distance (in points) that the view shifts in the direction of drag
     /// when pulled beyond its bounds.
     public let offsetSize: CGFloat
@@ -82,7 +82,7 @@ public struct ElasticDragProperties: Sendable {
     /// to the drag direction.
     ///
     /// A value of `0` means no compression (0% of the thickness),
-    /// and `1` means full compression equal to 100% of the thickness.
+    /// and `1` means a compression equal to 100% of the thickness.
     public let compressionFactor: CGFloat
 
     /// The factor by which the view expands along the axis of the drag.
@@ -91,7 +91,7 @@ public struct ElasticDragProperties: Sendable {
     /// along the axis opposite to the drag direction).
     ///
     /// A value of `0` means no expansion (0% of the thickness),
-    /// and `1` means full expansion equal to 100% of the thickness.
+    /// and `1` means an expansion equal to 100% of the thickness.
     public let expansionFactor: CGFloat
 
     /// Creates a new set of elastic drag properties.
@@ -121,8 +121,8 @@ public struct ElasticDragProperties: Sendable {
     /// A configuration that disables the elastic drag effect.
     public static let disable = ElasticDragProperties(
         offsetSize: 0,
-        compressionFactor: 1,
-        expansionFactor: 1
+        compressionFactor: 0,
+        expansionFactor: 0
     )
 }
 
@@ -199,10 +199,15 @@ extension View {
     ///
     /// - Parameters:
     ///   - offsetSize: The maximum offset to apply during excess drag.
-    ///   - compressionFactor: The scaling factor for compression (relative to
-    ///   thickness).
-    ///   - expansionFactor: The scaling factor for expansion (relative to
-    ///   thickness).
+    ///   - compressionFactor: The factor by which the view compresses along
+    ///   the axis perpendicular to the drag direction. A value of `0` means no
+    ///   compression (0% of the thickness), and `1` means a compression equal
+    ///   to 100% of the thickness.
+    ///   - expansionFactor: The factor by which the view expands along the
+    ///   axis of the drag. This expansion is proportional to the slider's
+    ///   thickness (i.e. the size along the axis opposite to the drag
+    ///   direction). A value of `0` means no expansion (0% of the thickness),
+    ///   and `1` means an expansion equal to 100% of the thickness.
     ///
     /// Default:
     /// `offsetSize: 25`, `compressionFactor: 0.1`, `expansionFactor: 0.2`
@@ -213,11 +218,11 @@ extension View {
     ) -> some View {
         environment(
             \.liteSliderElasticDragProperties,
-             ElasticDragProperties(
+            ElasticDragProperties(
                 offsetSize: offsetSize,
                 compressionFactor: compressionFactor,
                 expansionFactor: expansionFactor
-             )
+            )
         )
     }
 }

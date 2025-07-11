@@ -28,19 +28,34 @@ struct TouchAndDragGesture: Gesture {
     // MARK: Gesture Body
 
     var body: some Gesture {
-        DragGesture(minimumDistance: 0)
-            .onChanged { value in
-                if !isDragging {
+        touchGesture.simultaneously(with: dragGesture)
+    }
+
+    private var touchGesture: some Gesture {
+        isDragging
+            ? nil
+            : DragGesture(minimumDistance: 0)
+                .onChanged { value in
                     isDragging = true
                     onStarted?(value.location)
-                } else {
+                }
+                .onEnded { _ in
+                    isDragging = false
+                    onEnded?()
+                }
+    }
+
+    private var dragGesture: some Gesture {
+        isDragging
+            ? DragGesture(minimumDistance: 0)
+                .onChanged { value in
                     onChanged?(value.location)
                 }
-            }
-            .onEnded { _ in
-                isDragging = false
-                onEnded?()
-            }
+                .onEnded { _ in
+                    isDragging = false
+                    onEnded?()
+                }
+            : nil
     }
 }
 

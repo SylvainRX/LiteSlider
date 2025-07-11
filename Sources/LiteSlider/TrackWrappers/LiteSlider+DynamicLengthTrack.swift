@@ -28,7 +28,7 @@ extension LiteSlider {
             GeometryReader { geometry in
                 Track(
                     length: geometry.size.height,
-                    thumbView: thumbView,
+                    thumbViewProvider: thumbView,
                     dragRatio: $dragRatio,
                     isDragging: $isDragging,
                     onStartDragging: nil

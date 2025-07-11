@@ -203,12 +203,12 @@ public struct LiteSlider<ThumbView: View>: View {
                         design: .monospaced
                     )
                 )
-                .padding([.top], 20)
             Text(isDragging ? "drag" : "stop")
                 .font(.body)
                 .padding(.top, -20)
         }
         .foregroundStyle(.white)
+        .scaleEffect(1)
     }
 
     HStack(spacing: 18.5) {
@@ -217,9 +217,7 @@ public struct LiteSlider<ThumbView: View>: View {
             in: smallRange,
             thumbView: thumbView
         )
-        .sliderLengthBehavior(
-            .expandable(direction: .center, maxLength: 500)
-        )
+        .sliderLengthBehavior(.expandable(direction: .center, maxLength: 500))
         .sliderTrackColor(Color(hex: 0xFFD6C2, alpha: 0.5))
         .sliderProgressColor(Color(hex: 0xFF5733, alpha: 0.75))
 

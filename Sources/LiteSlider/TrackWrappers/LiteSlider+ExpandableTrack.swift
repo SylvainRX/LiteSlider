@@ -35,7 +35,7 @@ extension LiteSlider {
             ) {
                 Track(
                     length: trackLength,
-                    thumbView: thumbView,
+                    thumbViewProvider: thumbView,
                     dragRatio: $dragRatio,
                     isDragging: $isDragging,
                     onStartDragging: resetDragRatio
