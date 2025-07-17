@@ -10,16 +10,18 @@
   </picture>
 </div>
 
-[![Swift](https://img.shields.io/badge/Swift-FA7343?logo=swift&logoColor=white)](https://swift.org) [![GitHub stars](https://img.shields.io/github/stars/SylvainRX/LiteSlider?style=flat&color=yellow&label=Stars)](https://github.com/SylvainRX/LiteSlider/stargazers) [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](https://github.com/SylvainRX/LiteSlider/blob/main/LICENSE) ![iOS](https://img.shields.io/badge/iOS-17.0+-lightgray?logo=apple&logoColor=white) ![iPadOS](https://img.shields.io/badge/iPadOS-17.0+-lightgray?logo=apple&logoColor=white)
+[![Swift](https://img.shields.io/badge/Swift%206.1-FA7343?logo=swift&logoColor=white)](https://swift.org) [![GitHub stars](https://img.shields.io/github/stars/SylvainRX/LiteSlider?style=flat&color=yellow&label=Stars)](https://github.com/SylvainRX/LiteSlider/stargazers) [![License](https://img.shields.io/badge/License-Apache%202.0-blue)](https://github.com/SylvainRX/LiteSlider/blob/main/LICENSE) ![iOS](https://img.shields.io/badge/iOS-17.0+-lightgray?logo=apple&logoColor=white) ![iPadOS](https://img.shields.io/badge/iPadOS-17.0+-lightgray?logo=apple&logoColor=white)
 
 ## Features
 
 - Vertical slider for SwiftUI
-- Dynamic, fixed, or expandable track behavior
-- Customizable thumb views
-- Smooth drag gestures and animations
-- Support for accessibility and VoiceOver
-- Fine-tuned value formatting
+- Dynamic, fixed, or expandable track length behaviors
+- Customizable thumb views with drag-state awareness
+- Smooth drag gestures with elastic drag effect customization
+- Extensive track styling options (thickness, radius, colors, stroke)
+- Fine-grained control over drag elasticity (offset, compression, expansion)
+- Full accessibility support with custom value formatting and step size
+- Support for binding to continuous or stepped values
 
 ## Usage
 
