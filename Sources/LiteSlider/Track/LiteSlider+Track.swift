@@ -41,6 +41,7 @@ extension LiteSlider {
         @Environment(\.liteSliderStrokeStyle) private var strokeStyle
         @Environment(\.liteSliderElasticDragProperties)
         private var elasticDragProperties
+        @Environment(\.liteSliderOnStarted) private var onStarted
 
         // MARK: Constants
 
@@ -117,6 +118,7 @@ extension LiteSlider {
         private var gesture: some Gesture {
             TouchAndDragGesture(isDragging: $isDragging)
                 .onStarted { location in
+                    onStarted()
                     updateDragLocation(for: location)
                     if let onStartDragging {
                         onStartDragging()

@@ -27,3 +27,31 @@ extension EnvironmentValues {
         set { self[LiteSliderOnEndedKey.self] = newValue }
     }
 }
+
+// MARK: - LiteSlider OnStarted
+
+extension View {
+
+    /// Sets a closure to be called when the user starts dragging the slider.
+    ///
+    /// - Parameter onStarted: The closure to run when dragging ends.
+    ///
+    /// Default: No action.
+    public func onSliderDragStarted(
+        _ onEnded: @escaping () -> Void
+    ) -> some View {
+        environment(\.liteSliderOnEnded, onEnded)
+    }
+}
+
+private struct LiteSliderOnStartedKey: @preconcurrency EnvironmentKey {
+    @MainActor static let defaultValue: () -> Void = {}
+}
+
+extension EnvironmentValues {
+
+    var liteSliderOnStarted: () -> Void {
+        get { self[LiteSliderOnStartedKey.self] }
+        set { self[LiteSliderOnStartedKey.self] = newValue }
+    }
+}
